@@ -14,13 +14,21 @@
   <script src="https://unpkg.com/supersimpledev/dayjs.js"></script>
   <script src="https://unpkg.com/supersimpledev/babel.js"></script>
   <script type="text/babel">
-    function TakeInput({chatmsg,setChatMessages}) {
-      const [inputText, setInput] = React.useState('')
+    function TakeInput({ chatmsg, setChatMessages }) {
+      const [inputText, setInput] = React.useState('');
+      const [isLoading, setIsLoading] = React.useState(false);
+
       function saveInputText(event) {
         setInput(event.target.value);
       }
-      function sendMessage() {
-        const newMsg=[
+      async function sendMessage() {
+        if (isLoading || inputText === '') {
+          return;
+        }
+        setIsLoading(true);
+
+        setInput('');
+        const newMsg = [
           ...chatmsg,
           {
             message: inputText,
@@ -29,9 +37,16 @@
           }
         ]
 
-        setChatMessages(newMsg);
+        setChatMessages([
+          ...newMsg,
+          {
+            message: 'Loading...',
+            sender: 'robot',
+            id: crypto.randomUUID()
+          }
+        ]);
 
-        const response = Chatbot.getResponse(inputText);
+        const response = await Chatbot.getResponseAsync(inputText);
         setChatMessages([
           ...newMsg,
           {
@@ -40,11 +55,17 @@
             id: crypto.randomUUID()
           }
         ]);
-
-
-
-        setInput('');
+        setIsLoading(false);
       }
+
+      function CheckTheKey(event) {
+        if (event.key == 'Enter') {
+          sendMessage();
+        } else if (event.key == "Escape") {
+          setInput('');
+        }
+      }
+
       return (
         <>
           <input
@@ -52,6 +73,7 @@
             size="30"
             onChange={saveInputText}
             value={inputText}
+            onKeyDown={CheckTheKey}
           ></input>
           <button
             onClick={sendMessage}
@@ -94,7 +116,7 @@
 
 
 
-    function ChatMessage({chatmsg,setChatMessages}) {
+    function ChatMessage({ chatmsg, setChatMessages }) {
 
       return (
         <>
@@ -140,7 +162,7 @@
           ></TakeInput>
           <ChatMessage
             chatmsg={chatmsg}
-            setChatMessages={setChatMessages}  
+            setChatMessages={setChatMessages}
           />
         </>
       );
