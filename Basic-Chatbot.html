@@ -3,6 +3,8 @@
 
 <head>
   <title>Basic-Chatbot</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -67,18 +69,21 @@
       }
 
       return (
-        <>
+        <div
+          className="input-cont">
           <input
             placeholder="Send a message to the chatbot"
             size="30"
             onChange={saveInputText}
             value={inputText}
             onKeyDown={CheckTheKey}
+            className="chat-input"
           ></input>
           <button
+            className="send-button"
             onClick={sendMessage}
           >Send</button>
-        </>
+        </div>
 
       );
     }
@@ -100,13 +105,17 @@
       // }
 
       return (
-        <div>
+        <div
+          className={sender === 'user' ? "user" : "robot"}
+        >
           {sender === 'robot' && (
-            <img src="robot.png" width="50" alt=""></img>
+            <img className="img" src="robot.png" width="50" alt=""></img>
           )}
-          {message}
+          <p
+            className="para"
+          >{message}</p>
           {sender === 'user' && (
-            <img src="user.png" width="50px"></img>
+            <img className="img" src="user.png" width="50px"></img>
           )}
         </div>
       );
@@ -116,23 +125,27 @@
 
 
 
-    function ChatMessage({ chatmsg, setChatMessages }) {
+    function ChatMessage({ chatmsg }) {
+      const bottomRef = React.useRef(null);
+
+      React.useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [chatmsg]);
 
       return (
         <>
-          {chatmsg.map((chatmessage) => {
-            return (
-              <ChatMsg
-                message={chatmessage.message}
-                sender={chatmessage.sender}
-                key={chatmessage.id}
-              ></ChatMsg>
-            );
-          })}
+          {chatmsg.map((chatmessage) => (
+            <ChatMsg
+              message={chatmessage.message}
+              sender={chatmessage.sender}
+              key={chatmessage.id}
+            />
+          ))}
+          <div ref={bottomRef}></div>
         </>
       );
-
     }
+
 
 
 
@@ -156,14 +169,14 @@
 
       return (
         <>
-          <TakeInput
-            chatmsg={chatmsg}
-            setChatMessages={setChatMessages}
-          ></TakeInput>
           <ChatMessage
             chatmsg={chatmsg}
             setChatMessages={setChatMessages}
           />
+          <TakeInput
+            chatmsg={chatmsg}
+            setChatMessages={setChatMessages}
+          ></TakeInput>
         </>
       );
     }
